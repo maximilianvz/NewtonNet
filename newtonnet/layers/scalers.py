@@ -88,7 +88,7 @@ class TrainableScaleShift(nn.Module):
         torch.Tensor: layer output.
 
         """
-        selected_mean = self.mean[z][...,None]
-        selected_stddev = self.stddev[z][...,None]
+        selected_mean = self.mean[z-1][...,None]
+        selected_stddev = self.stddev[z-1][...,None]
         y = input_energies * selected_stddev + selected_mean
         return y
