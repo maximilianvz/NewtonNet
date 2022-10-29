@@ -25,6 +25,25 @@ else:
 train_gen, val_gen, test_gen, tr_steps, val_steps, test_steps, normalizer = parse_train_test(settings,device[0])
 print('normalizer: ', normalizer)
 
+if settings['model']['normalize_atomic']:
+    atnums = next(train_gen)["Z"][0]
+    means_with_atnums = list(zip(normalizer[0], atnums))
+    max_z = 10
+    atomwise_means = np.zeros(max_z)
+    for i in range(1, len(means_with_atnums)):
+        mean_ea = np.array([means_with_atnums[tup][0] for tup in range(len(means_with_atnums)) if means_with_atnums[tup][1] == i])
+        if len(mean_ea) != 0:
+            atomwise_means[i - 1] = np.mean(mean_ea)
+
+    stddevs_with_atnums = list(zip(normalizer[1], atnums))
+    atomwise_std = np.zeros(max_z)
+    for i in range(1, len(stddevs_with_atnums)):
+        std_ea = np.array([stddevs_with_atnums[tup][0] for tup in range(len(stddevs_with_atnums)) if stddevs_with_atnums[tup][1] == i])
+        if len(std_ea) != 0:
+            atomwise_std[i - 1] = np.mean(std_ea)
+
+    normalizer = (atomwise_means,atomwise_std)
+
 # model
 # activation function
 activation = get_activation_by_string(settings['model']['activation'])
