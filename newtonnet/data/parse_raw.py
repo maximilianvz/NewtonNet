@@ -764,15 +764,16 @@ def parse_train_test(settings, device, unit='kcal'):
                 else:
                     dtest[key] = test[key]
 
-        elif key in ['R','F','Z']:
+        elif key in ['R','F','Z','Ea']:
             dtrain[key] = data[key]
             if test is not None:
                 dtest[key] = test[key]
-
     # convert unit
     if unit == 'ev':
         dtrain['E'] = dtrain['E'] * 23.061
         dtrain['F'] = dtrain['F'] * 23.061
+        if 'Ea' in dtrain.keys():
+            dtrain['Ea'] = dtrain['Ea'] * 23.061
 
     # split the data
     dtrain, dval, dtest_leftover = split(dtrain,

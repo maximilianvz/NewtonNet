@@ -80,6 +80,12 @@ def batch_dataset_converter(input, device):
         result["E"] = torch.tensor(input['E'],
                                    dtype=torch.float32,
                                    device=device)
+
+    if "Ea" in input:
+        result["Ei"] = torch.tensor(input["Ea"],
+                                    dtype=torch.float32,
+                                    device=device)
+
     if "F" in input:
         result["F"] = torch.tensor(input['F'],
                                     dtype=torch.float32,
