@@ -128,7 +128,7 @@ class NewtonNet(nn.Module):
 
         self.normalize_atomic = normalize_atomic
         if normalize_atomic:
-            self.inverse_normalize = TrainableScaleShift(max_z)
+            self.inverse_normalize = TrainableScaleShift(max_z, initial_mean=normalizer[0], initial_stddev=normalizer[1])
         else:
             if type(normalizer) is dict:
                 self.inverse_normalize = nn.ModuleDict(
