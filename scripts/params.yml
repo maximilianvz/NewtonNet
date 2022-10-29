@@ -21,7 +21,7 @@ general:
   output:
   - trainings
   - 1
-  root: /Users/maximilianvanzyl/Desktop/newtonnet_scripts_test/energy_force_atenergy/newtonnet_ethanol_nf128_nb20_ni3/nt950_nv50_28_10_2022_19h_30min
+  root: N/A
   run_name: training
 hooks:
   vismolvector3d: false
