@@ -87,12 +87,15 @@ class Trainer:
             self.log_loss.update({
                 'tr_E(MAE)': [],
                 'tr_F(MAE)': [],
+                'tr_Ei(MAE)': [],
                 'val_E(MAE)': [],
                 'val_F(MAE)': [],
+                'val_Ei(MAE)': [],
                 'irc_E(MAE)': [],
                 'irc_F(MAE)': [],
                 'test_E(MAE)': [],
-                'test_F(MAE)': []
+                'test_F(MAE)': [],
+                'test_Ei(MAE)': []
             })
         elif mode == "atomic_properties":
             self.log_loss.update({
@@ -322,6 +325,7 @@ class Trainer:
 
         val_error_energy = []
         val_error_force = []
+        val_error_at_energy = []
         energy_pred = []
         force_pred = []
         e = []
@@ -368,6 +372,9 @@ class Trainer:
             val_error_energy.append(self.metric_ae(
                 val_preds['E'].detach().cpu().numpy(), E.detach().cpu().numpy(),
                 divider=val_batch['NA'].detach().cpu().numpy() if 'NA' in val_batch else None))
+            val_error_at_energy.append(self.metric_ae(
+                val_preds['Ei'].detach().cpu().numpy(), val_batch["Ei"].detach().cpu().numpy()
+            ))
             energy_pred.append(val_preds['E'].detach().cpu().numpy())
             e.append(E.detach().cpu().numpy())
             ei.append(val_preds['Ei'].detach().cpu().numpy())
@@ -543,6 +550,7 @@ class Trainer:
             running_loss = 0.0
             ae_energy = 0.0
             ae_force = 0.0
+            ae_atomic_energy = 0.0
             rmse_ai = []
             n_data = 0
             n_atoms = 0
@@ -582,7 +590,10 @@ class Trainer:
                         preds['E'].detach().cpu().numpy(),
                         train_batch["E"].detach().cpu().numpy(),
                         divider=train_batch['NA'].detach().cpu().numpy() if 'NA' in train_batch else None))
-
+                    ae_atomic_energy += np.sum(self.metric_ae(
+                        preds['Ei'].detach().cpu().numpy(),
+                        train_batch["Ei"].detach().cpu().numpy()
+                    ))
                     if self.mode == "energy/force":
                         ae_f = self.metric_ae(
                             preds['F'].detach().cpu().numpy(),
@@ -599,7 +610,8 @@ class Trainer:
                             % (self.epoch, epochs, s, steps, current_loss,
                             np.sqrt(running_loss / (s + 1)),
                             (ae_energy / (n_data)),
-                            (ae_force / (n_atoms*3))
+                            (ae_force / (n_atoms*3)),
+                            (ae_atomic_energy / (natoms))
                             ))
                 elif self.mode == "atomic_properties":
                     target_name = 'Ai'
@@ -626,6 +638,7 @@ class Trainer:
             if self.mode in ["energy/force", "energy"]:
                 ae_energy /= n_data
                 ae_force /= (n_atoms * 3)
+                ae_atomic_energy /= n_atoms
             elif self.mode == "atomic_properties":
                 rmse_ai = np.mean(rmse_ai[-100:])
 
@@ -647,7 +660,8 @@ class Trainer:
                         val_error = self.energy_loss_w * np.mean(outputs['E_ae'])
 
                     val_mae_E = np.mean(outputs['E_ae'])
-                    val_mae_F = np.mean(outputs['F_ae_masked'])
+                    val_mae_F = np.mean(outputs['F_ae_masked']) # reduces tensor of any dimension to a single value
+                    val_mae_Ei = np.mean(outputs['Ei_ae'])
             elif self.mode == "atomic_properties":
                 if val_generator is not None and \
                     self.epoch % self.check_val == 0:
@@ -657,7 +671,7 @@ class Trainer:
 
             # best model
             irc_mae_E = 0; irc_mae_F = 0
-            test_mae_E = 0; test_mae_F = 0
+            test_mae_E = 0; test_mae_F = 0; test_mae_Ei = 0
             test_error = 0
             if self.best_val_loss > val_error:
                 self.best_val_loss = val_error
@@ -699,6 +713,7 @@ class Trainer:
                         outputs = self.validation('test', test_generator, test_steps)
                         test_mae_E = np.mean(outputs['E_ae'])
                         test_mae_F = np.mean(outputs['F_ae_masked'])
+                        test_mae_Ei = np.mean(outputs['Ei_ae'])
                         np.save(os.path.join(self.val_out_path, 'test_ae_E'), outputs['E_ae'])
                         np.save(os.path.join(self.val_out_path, 'test_ae_F'), outputs['F_ae'])
                         np.save(os.path.join(self.val_out_path, 'test_pred_E'), outputs['E_pred'])
@@ -737,12 +752,15 @@ class Trainer:
                         "loss(MSE)": running_loss,
                         'tr_E(MAE)': ae_energy,
                         'tr_F(MAE)': ae_force,
+                        'tr_Ei(MAE)': ae_atomic_energy,
                         'val_E(MAE)': val_mae_E,
                         'val_F(MAE)': val_mae_F,
+                        'val_Ei(MAE)': val_mae_Ei,
                         'irc_E(MAE)': irc_mae_E,
                         'irc_F(MAE)': irc_mae_F,
                         'test_E(MAE)': test_mae_E,
                         'test_F(MAE)': test_mae_F,
+                        'test_Ei(MAE)': test_mae_Ei,
                         "lr": old_lr,
                         "time": time.time() - t0},
                         steps)
