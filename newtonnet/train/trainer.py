@@ -417,6 +417,7 @@ class Trainer:
         outputs['E_ae'] = np.concatenate(val_error_energy, axis=0)
         outputs['E_pred'] = np.concatenate(energy_pred,axis=0)
         outputs['E'] = np.concatenate(e, axis=0)
+        outputs['Ei_ae'] = np.concatenate(val_error_at_energy, axis=0)
         outputs['Ei'] = standardize_batch(list(chain(*ei)))
         if len(fi) > 0:
             outputs['dEi'] = standardize_batch(list(chain(*fi)))
