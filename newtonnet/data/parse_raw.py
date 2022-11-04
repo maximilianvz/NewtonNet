@@ -793,7 +793,10 @@ def parse_train_test(settings, device, unit='kcal'):
 
 
     # extract data stats
-    normalizer = (dtrain['E'].mean(), dtrain['E'].std())
+    if "Ea" in dtrain.keys() and settings["data"]["atomwise_mean_stddev"]:
+        normalizer = (dtrain['Ea'].mean(axis=0), dtrain['Ea'].std(axis=0))
+    else:
+        normalizer = (dtrain['E'].mean(), dtrain['E'].std())
 
     n_tr_data = dtrain['R'].shape[0]
     n_val_data = dval['R'].shape[0]
