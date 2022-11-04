@@ -126,6 +126,7 @@ class NewtonNet(nn.Module):
         # final dense network
         self.atomic_energy = AtomicEnergy(n_features, activation, dropout)
 
+        self.normalizer = normalizer
         self.normalize_atomic = normalize_atomic
         if normalize_atomic:
             self.inverse_normalize = TrainableScaleShift(max_z, initial_mean=normalizer[0], initial_stddev=normalizer[1])
@@ -219,14 +220,24 @@ class NewtonNet(nn.Module):
 
         # inverse normalize
         Ei = Ei * AM[..., None]  # (B,A,1)
-        if self.aggregration == 'sum':
-            E = torch.sum(Ei, 1)  # (B,1)
-        elif self.aggregration == 'mean':
-            E = torch.mean(Ei, 1)
-        elif self.aggregration == 'max':
-            E = torch.max(Ei, 1).values
-        if not self.normalize_atomic:
-            E = self.inverse_normalize(E)
+        if self.normalizer[0].size > 1:
+            Ei = self.inverse_normalize(Ei)
+            if self.aggregration == 'sum':
+                E = torch.sum(Ei, 1)
+            elif self.aggregration == 'mean':
+                E = torch.mean(Ei, 1)
+            elif self.aggregration == 'max':
+                E = torch.max(Ei, 1).values
+
+        else:
+            if self.aggregration == 'sum':
+                E = torch.sum(Ei, 1)  # (B,1)
+            elif self.aggregration == 'mean':
+                E = torch.mean(Ei, 1)
+            elif self.aggregration == 'max':
+                E = torch.max(Ei, 1).values
+            if not self.normalize_atomic:
+                E = self.inverse_normalize(E)
 
         if self.requires_dr:
 
