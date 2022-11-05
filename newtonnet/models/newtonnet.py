@@ -220,14 +220,15 @@ class NewtonNet(nn.Module):
 
         # inverse normalize
         Ei = Ei * AM[..., None]  # (B,A,1)
-        if self.normalizer[0].size > 1:
-            Ei = self.inverse_normalize(Ei)
-            if self.aggregration == 'sum':
-                E = torch.sum(Ei, 1)
-            elif self.aggregration == 'mean':
-                E = torch.mean(Ei, 1)
-            elif self.aggregration == 'max':
-                E = torch.max(Ei, 1).values
+        if hasattr(self, "normalizer"):
+            if self.normalizer[0].size > 1:
+                Ei = self.inverse_normalize(Ei)
+                if self.aggregration == 'sum':
+                    E = torch.sum(Ei, 1)
+                elif self.aggregration == 'mean':
+                    E = torch.mean(Ei, 1)
+                elif self.aggregration == 'max':
+                    E = torch.max(Ei, 1).values
 
         else:
             if self.aggregration == 'sum':
