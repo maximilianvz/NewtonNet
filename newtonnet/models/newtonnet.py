@@ -230,6 +230,16 @@ class NewtonNet(nn.Module):
                 elif self.aggregration == 'max':
                     E = torch.max(Ei, 1).values
 
+            else:
+                if self.aggregration == 'sum':
+                    E = torch.sum(Ei, 1)  # (B,1)
+                elif self.aggregration == 'mean':
+                    E = torch.mean(Ei, 1)
+                elif self.aggregration == 'max':
+                    E = torch.max(Ei, 1).values
+                if not self.normalize_atomic:
+                    E = self.inverse_normalize(E)
+
         else:
             if self.aggregration == 'sum':
                 E = torch.sum(Ei, 1)  # (B,1)
