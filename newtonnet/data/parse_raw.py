@@ -796,6 +796,8 @@ def parse_train_test(settings, device, unit='kcal'):
     if "atomwise_mean_stddev" in settings["data"].keys():
         if "Ea" in dtrain.keys() and settings["data"]["atomwise_mean_stddev"]:
             normalizer = (dtrain['Ea'].mean(axis=0), dtrain['Ea'].std(axis=0))
+        else:
+            normalizer = (dtrain['E'].mean(), dtrain['E'].std())
     else:
         normalizer = (dtrain['E'].mean(), dtrain['E'].std())
 
