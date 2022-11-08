@@ -30,6 +30,7 @@ class Trainer:
                  lr_scheduler,
                  energy_loss_w,
                  force_loss_w,
+                 at_energy_loss_w,
                  loss_wf_decay,
                  checkpoint_log=1,
                  checkpoint_val=1,
@@ -48,6 +49,7 @@ class Trainer:
         self.device = device
         self.energy_loss_w = energy_loss_w
         self.force_loss_w = force_loss_w
+        self.at_energy_loss_w = at_energy_loss_w
         self.wf_lambda = lambda epoch: np.exp(-epoch * loss_wf_decay)
 
         if type(device) is list and len(device) > 1:
@@ -656,7 +658,8 @@ class Trainer:
                     outputs = self.validation('valid', val_generator, val_steps)
                     if self.requires_dr:
                         val_error = self.energy_loss_w * np.mean(outputs['E_ae']) + \
-                                    self.force_loss_w * np.mean(outputs['F_ae_masked'])
+                                    self.force_loss_w * np.mean(outputs['F_ae_masked']) + \
+                                    self.at_energy_loss_w * np.mean(outputs['Ei_ae'])
                     else:
                         val_error = self.energy_loss_w * np.mean(outputs['E_ae'])
 
