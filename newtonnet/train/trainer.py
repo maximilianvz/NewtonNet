@@ -639,7 +639,7 @@ class Trainer:
             if self.mode in ["energy/force", "energy"]:
                 ae_energy /= n_data
                 ae_force /= (n_atoms * 3)
-                ae_atomic_energy /= n_atoms
+                ae_atomic_energy /= (n_atoms * n_data)
             elif self.mode == "atomic_properties":
                 rmse_ai = np.mean(rmse_ai[-100:])
 
