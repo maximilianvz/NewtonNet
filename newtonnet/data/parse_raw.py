@@ -37,7 +37,7 @@ def concat_listofdicts(listofdicts, axis=0):
     return data
 
 
-def split(data, train_size, test_size, val_size, random_states=90, stratify=None):
+def split(data, settings, train_size, test_size, val_size, random_states=90, stratify=None):
     """
 
     Parameters
@@ -57,21 +57,30 @@ def split(data, train_size, test_size, val_size, random_states=90, stratify=None
 
     """
 
-    tr_ind, val_ind = train_test_split(list(range(data['R'].shape[0])),
-                                      test_size=val_size,
-                                      random_state=random_states,
-                                      stratify=stratify)
+    # use predefined splits if they exist in the yaml file
+    # note that it is assumed that whatever is not used from the training split file for tr_ind should be assigned to val_ind
+    if ("train_ind" and "test_ind") in settings["data"].keys():
+        tr_val_splits = settings["data"]["train_ind"]
+        tr_ind = tr_val_splits[:train_size]
+        val_ind = tr_val_splits[train_size:]
+        te_ind = settings["data"]["test_ind"]
 
-    if stratify is not None:
-        stratify_new = stratify[tr_ind]
     else:
-        stratify_new = None
+        tr_ind, val_ind = train_test_split(list(range(data['R'].shape[0])),
+                                          test_size=val_size,
+                                          random_state=random_states,
+                                          stratify=stratify)
 
-    tr_ind, te_ind = train_test_split(tr_ind,
-                                       test_size=test_size,
-                                       train_size=train_size,
-                                       random_state=random_states,
-                                       stratify=stratify_new)
+        if stratify is not None:
+            stratify_new = stratify[tr_ind]
+        else:
+            stratify_new = None
+
+        tr_ind, te_ind = train_test_split(tr_ind,
+                                           test_size=test_size,
+                                           train_size=train_size,
+                                           random_state=random_states,
+                                           stratify=stratify_new)
 
     train = dict()
     val = dict()
@@ -777,6 +786,7 @@ def parse_train_test(settings, device, unit='kcal'):
 
     # split the data
     dtrain, dval, dtest_leftover = split(dtrain,
+                                         settings,
                                         train_size=train_size,
                                         test_size=None,
                                         val_size=val_size,
