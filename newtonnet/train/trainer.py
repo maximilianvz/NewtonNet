@@ -711,27 +711,27 @@ class Trainer:
                     np.save(os.path.join(self.val_out_path, 'irc_RM'), outputs['RM'])
                     # np.save(os.path.join(self.val_out_path, 'irc_Ei_epoch%i'%self.epoch), outputs['Ei'])
 
-                # save test predictions
-                if test_generator is not None and self.epoch - last_test_epoch >= self.check_test:
-                    if self.mode in ["energy/force", "energy"]:
-                        outputs = self.validation('test', test_generator, test_steps)
-                        test_mae_E = np.mean(outputs['E_ae'])
-                        test_mae_F = np.mean(outputs['F_ae_masked'])
-                        test_mae_Ei = np.mean(outputs['Ei_ae'])
-                        np.save(os.path.join(self.val_out_path, 'test_ae_E'), outputs['E_ae'])
-                        np.save(os.path.join(self.val_out_path, 'test_ae_F'), outputs['F_ae'])
-                        np.save(os.path.join(self.val_out_path, 'test_pred_E'), outputs['E_pred'])
-                        np.save(os.path.join(self.val_out_path, 'test_pred_F'), outputs['F_pred'])
-                        np.save(os.path.join(self.val_out_path, 'test_E'), outputs['E'])
-                        np.save(os.path.join(self.val_out_path, 'test_F'), outputs['F'])
-                        np.save(os.path.join(self.val_out_path, 'test_AM'), outputs['AM'])
-                        np.save(os.path.join(self.val_out_path, 'test_RM'), outputs['RM'])
-                    elif self.mode == "atomic_properties":
-                        outputs = self.validation_atomic_properties('test', "CS", test_generator, test_steps)
-                        torch.save(outputs, os.path.join(self.val_out_path, 'test_results.pkl'))
-                        test_error = outputs["RMSE"]
-                    last_test_epoch = self.epoch
-                    # np.save(os.path.join(self.val_out_path, 'test_Ei_epoch%i'%self.epoch), outputs['Ei'])
+                # # save test predictions
+                # if test_generator is not None and self.epoch - last_test_epoch >= self.check_test:
+                #     if self.mode in ["energy/force", "energy"]:
+                #         outputs = self.validation('test', test_generator, test_steps)
+                #         test_mae_E = np.mean(outputs['E_ae'])
+                #         test_mae_F = np.mean(outputs['F_ae_masked'])
+                #         test_mae_Ei = np.mean(outputs['Ei_ae'])
+                #         np.save(os.path.join(self.val_out_path, 'test_ae_E'), outputs['E_ae'])
+                #         np.save(os.path.join(self.val_out_path, 'test_ae_F'), outputs['F_ae'])
+                #         np.save(os.path.join(self.val_out_path, 'test_pred_E'), outputs['E_pred'])
+                #         np.save(os.path.join(self.val_out_path, 'test_pred_F'), outputs['F_pred'])
+                #         np.save(os.path.join(self.val_out_path, 'test_E'), outputs['E'])
+                #         np.save(os.path.join(self.val_out_path, 'test_F'), outputs['F'])
+                #         np.save(os.path.join(self.val_out_path, 'test_AM'), outputs['AM'])
+                #         np.save(os.path.join(self.val_out_path, 'test_RM'), outputs['RM'])
+                #     elif self.mode == "atomic_properties":
+                #         outputs = self.validation_atomic_properties('test', "CS", test_generator, test_steps)
+                #         torch.save(outputs, os.path.join(self.val_out_path, 'test_results.pkl'))
+                #         test_error = outputs["RMSE"]
+                #     last_test_epoch = self.epoch
+                #     # np.save(os.path.join(self.val_out_path, 'test_Ei_epoch%i'%self.epoch), outputs['Ei'])
 
             # learning rate decay
             if self.lr_scheduler[0] == 'plateau':

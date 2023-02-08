@@ -59,10 +59,9 @@ def split(data, settings, train_size, test_size, val_size, random_states=90, str
 
     # use predefined splits if they exist in the yaml file
     # note that it is assumed that whatever is not used from the training split file for tr_ind should be assigned to val_ind
-    if ("train_ind" and "test_ind") in settings["data"].keys():
-        tr_val_splits = settings["data"]["train_ind"]
-        tr_ind = tr_val_splits[:train_size]
-        val_ind = tr_val_splits[train_size:]
+    if ("train_ind" and "val_ind" and "test_ind") in settings["data"].keys():
+        tr_ind = settings["data"]["train_ind"]
+        val_ind = settings["data"]["val_ind"]
         te_ind = settings["data"]["test_ind"]
 
     else:
